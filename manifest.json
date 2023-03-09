@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "Grepotion",
+    "description": "Basic utility chrome extension for Grepolis browser game",
+    "version": "1.0",
+    "permissions": ["activeTab", "scripting", "alarms", "nativeMessaging"],
+    "action": {
+        "default_title": "Building queue tool",
+        "default_icon": "icon.png",
+        "default_popup": "front_end.html"
+    },
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    }
+}
