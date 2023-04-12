@@ -45,18 +45,21 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    // Register a new building onto the queue
-    if (message.startsWith("register")) {
-        let buildingName = message.substring(10, message.length);
-        tryRegisterBuilding(buildingName);
-
-        return sendResponse("ok");
+    // Return the top item of the queue to the content script
+    if (message === 'getQueue') {
+        sendResponse(queue);
+        return;
     }
 
-    // Return the top item of the queue to the content script
-    if (message === 'get-next') {
-        sendResponse(returnNextBuilding());
+    if (message === 'getQueueArray') {
+        sendResponse(queue.getElements());
         return;
+    }
+
+    if (message === 'buildingScheduled') {
+        queue.dequeue();
+        
+        return sendResponse("ok");
     }
 
     if (message === 'start') {
@@ -70,6 +73,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         return sendResponse("ok");
     }
+
+    if (message === 'emptyQueue') {
+        queue.clear();
+
+        return sendResponse("ok");
+    }
+
+    // If no message was recongized, it must be a building
+    tryRegisterBuilding(message);
+    sendResponse("ok");
 })
 
 function handleFunctionalityStart() {
@@ -89,20 +102,9 @@ function handleFunctionalityStart() {
 }
 
 function tryRegisterBuilding(name) {
-    let internalName = "building_main_" + buildingName;
+    let internalName = "building_main_" + name;
 
     if (ids.includes(internalName)) {
         queue.enqueue(internalName);
     }
 }
-
-function returnNextBuilding() {
-    if (queue.isEmpty) {
-        return null;
-    }
-
-    return queue.dequeue();
-}
-
-
-
